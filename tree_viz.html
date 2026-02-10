@@ -101,15 +101,15 @@
         }
         
         #controls h1 {
-            font-size: 16px;
-            margin-bottom: 10px;
+            font-size: 18px;
+            margin-bottom: 12px;
             color: #7eb8ff;
         }
         
         #controls p {
-            font-size: 12px;
-            color: #888;
-            margin-bottom: 5px;
+            font-size: 16px;
+            color: #aaa;
+            margin-bottom: 8px;
         }
         
         #stats {
@@ -581,6 +581,20 @@
             svg.call(zoom.transform, d3.zoomIdentity
                 .translate(initialX, initialY)
                 .scale(initialScale));
+            
+            // Auto-click on bostonjerry's Shakira post
+            const bostonjerryUri = 'at://did:plc:y3dvjnlgnytjs5p6h7b33y6f/app.bsky.feed.post/3mehafukse22q';
+            const targetNode = treeData.descendants().find(d => d.data.uri === bostonjerryUri);
+            if (targetNode) {
+                // Small delay to let the viz render
+                setTimeout(() => {
+                    showPlayer(targetNode);
+                    // Also highlight the node
+                    const nodeEl = nodes.filter(d => d.data.uri === bostonjerryUri);
+                    nodeEl.classed('selected', true);
+                    selectedNode = nodeEl;
+                }, 500);
+            }
                 
         }).catch(err => {
             console.error('Error loading data:', err);

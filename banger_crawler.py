@@ -157,20 +157,57 @@ def fetch_post(uri):
     })
     return data.get('thread', {}).get('post')
 
-def save_post(con, post):
-    """Save a post to the database."""
+def save_post(con, post, force_update=False):
+    """Save a post to the database.
+    
+    If post exists and quote_count increased, marks quotes_crawled=FALSE so we re-crawl.
+    Returns True if this is a new post, False if it already existed.
+    """
     if not post:
         return False
     
+    uri = post.get('uri')
     record = post.get('record', {})
     author = post.get('author', {})
     
     embed_type, media_url, media_title, media_desc = extract_media_info(record)
     quotes_uri = extract_quoted_uri(record)
+    new_quote_count = post.get('quoteCount', 0)
     
+    # Check if post exists and if quote count changed
+    existing = con.execute(
+        "SELECT quote_count, quotes_crawled FROM posts WHERE uri = ?", [uri]
+    ).fetchone()
+    
+    if existing:
+        old_quote_count, was_crawled = existing
+        # If quote count increased, we need to re-crawl
+        needs_recrawl = new_quote_count > (old_quote_count or 0)
+        
+        if force_update or needs_recrawl:
+            con.execute("""
+                UPDATE posts SET
+                    like_count = ?,
+                    quote_count = ?,
+                    repost_count = ?,
+                    reply_count = ?,
+                    quotes_crawled = ?
+                WHERE uri = ?
+            """, [
+                post.get('likeCount', 0),
+                new_quote_count,
+                post.get('repostCount', 0),
+                post.get('replyCount', 0),
+                False if needs_recrawl else was_crawled,
+                uri
+            ])
+            con.commit()
+        return False  # Not a new post
+    
+    # New post - insert it
     try:
         con.execute("""
-            INSERT OR REPLACE INTO posts (
+            INSERT INTO posts (
                 uri, cid, author_did, author_handle, author_display_name,
                 text, created_at, indexed_at,
                 like_count, quote_count, repost_count, reply_count,
@@ -178,7 +215,7 @@ def save_post(con, post):
                 crawled_at, quotes_crawled
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, FALSE)
         """, [
-            post.get('uri'),
+            uri,
             post.get('cid'),
             author.get('did'),
             author.get('handle'),
@@ -187,7 +224,7 @@ def save_post(con, post):
             record.get('createdAt'),
             post.get('indexedAt'),
             post.get('likeCount', 0),
-            post.get('quoteCount', 0),
+            new_quote_count,
             post.get('repostCount', 0),
             post.get('replyCount', 0),
             quotes_uri,
@@ -197,7 +234,7 @@ def save_post(con, post):
             media_desc
         ])
         con.commit()
-        return True
+        return True  # New post
     except Exception as e:
         print(f"Error saving post: {e}")
         return False
@@ -389,6 +426,59 @@ if __name__ == "__main__":
             print(f"\nCrawling {qcount} quotes from {uri[:60]}...")
             count = crawl_quotes_bfs(con, uri)
             print(f"Got {count} new posts")
+        
+        print_stats(con)
+    
+    elif cmd == "update":
+        # Efficiently update the tree by checking for new quotes
+        # 1. Re-fetch posts that had quotes to see if count increased
+        # 2. Crawl any newly discovered quotes
+        
+        print("Checking for new quotes on existing posts...")
+        
+        # Get all posts that had quotes (most likely to have new ones)
+        posts_with_quotes = con.execute('''
+            SELECT uri FROM posts 
+            WHERE quote_count > 0
+            ORDER BY quote_count DESC
+        ''').fetchall()
+        
+        updated = 0
+        for (uri,) in posts_with_quotes:
+            try:
+                post = fetch_post(uri)
+                if post:
+                    old_count = con.execute(
+                        "SELECT quote_count FROM posts WHERE uri = ?", [uri]
+                    ).fetchone()[0] or 0
+                    new_count = post.get('quoteCount', 0)
+                    
+                    if new_count > old_count:
+                        print(f"  {uri[:50]}... {old_count} -> {new_count} quotes")
+                        save_post(con, post, force_update=True)
+                        updated += 1
+            except Exception as e:
+                print(f"  Error fetching {uri[:50]}: {e}")
+        
+        print(f"\nFound {updated} posts with new quotes")
+        
+        if updated > 0:
+            print("\nCrawling new quotes...")
+            # Now crawl-all to get the new quotes
+            while True:
+                row = con.execute('''
+                    SELECT uri, quote_count FROM posts 
+                    WHERE quote_count > 0 AND quotes_crawled = FALSE
+                    ORDER BY quote_count DESC
+                    LIMIT 1
+                ''').fetchone()
+                
+                if not row:
+                    break
+                
+                uri, qcount = row
+                print(f"Crawling {qcount} quotes from {uri[:50]}...")
+                crawl_quotes_bfs(con, uri)
         
         print_stats(con)
     

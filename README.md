@@ -69,6 +69,12 @@ Crawl all uncrawled quotes in the database:
 python banger_crawler.py crawl-all
 ```
 
+Update the tree (efficiently check for new quotes on existing posts):
+
+```bash
+python banger_crawler.py update
+```
+
 View stats:
 
 ```bash
