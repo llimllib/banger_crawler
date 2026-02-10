@@ -360,15 +360,8 @@
         if (nodesWithMedia.length === 0) return;
         const randomIndex = Math.floor(Math.random() * nodesWithMedia.length);
         const randomNode = nodesWithMedia[randomIndex];
-        showPlayer(randomNode);
-        
-        // Update selection
-        if (selectedNode) {
-          selectedNode.classed('selected', false);
-        }
         const nodeEl = allNodes.filter(d => d.data.uri === randomNode.data.uri);
-        nodeEl.classed('selected', true);
-        selectedNode = nodeEl;
+        showPlayer(randomNode, nodeEl);
       }
 
       function getEmbedUrl(mediaUrl) {
@@ -447,7 +440,7 @@
         };
       }
 
-      function showPlayer(d) {
+      function showPlayer(d, nodeElement) {
         const data = d.data;
         const panel = document.getElementById("player-panel");
         const embedContainer = document.getElementById("player-embed");
@@ -509,10 +502,10 @@
         if (selectedNode) {
           selectedNode.classed("selected", false);
         }
-        selectedNode = d3
-          .select(d3.event ? d3.event.target : event.target)
-          .closest(".node");
-        selectedNode.classed("selected", true);
+        if (nodeElement) {
+          selectedNode = nodeElement;
+          selectedNode.classed("selected", true);
+        }
       }
 
       function closePlayer() {
@@ -638,9 +631,9 @@
             .attr("fill", getNodeColor)
             .on("mouseover", showTooltip)
             .on("mouseout", hideTooltip)
-            .on("click", (event, d) => {
+            .on("click", function(event, d) {
               event.stopPropagation();
-              showPlayer(d);
+              showPlayer(d, d3.select(this.parentNode));
             });
 
           // Tooltip
@@ -685,6 +678,9 @@
             d3.zoomIdentity.translate(initialX, initialY).scale(initialScale),
           );
 
+          // Set up random button click handler
+          document.getElementById("random-btn").addEventListener("click", playRandom);
+
           // Auto-click on bostonjerry's Shakira post
           const bostonjerryUri =
             "at://did:plc:y3dvjnlgnytjs5p6h7b33y6f/app.bsky.feed.post/3mehafukse22q";
@@ -694,11 +690,8 @@
           if (targetNode) {
             // Small delay to let the viz render
             setTimeout(() => {
-              showPlayer(targetNode);
-              // Also highlight the node
               const nodeEl = nodes.filter((d) => d.data.uri === bostonjerryUri);
-              nodeEl.classed("selected", true);
-              selectedNode = nodeEl;
+              showPlayer(targetNode, nodeEl);
             }, 500);
           }
         })
