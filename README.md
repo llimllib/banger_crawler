@@ -29,16 +29,16 @@ Node size = number of quote-posts
 
 | #   | Song                                          | Posts |
 | --- | --------------------------------------------- | ----- |
-| 1   | Adriano Celentano - Prisencolinensinainciusol | ~39   |
-| 2   | Nena - 99 Luftballons                         | 14    |
-| 3   | The HU - Wolf Totem                           | 9     |
-| 4   | O-Zone - Dragostea Din Tei                    | 9     |
-| 5   | Plastic Bertrand - Ça Plane Pour Moi          | ~17   |
-| 6   | Rammstein - Sonne / Du Hast                   | ~11   |
-| 7   | The HU - Yuve Yuve Yu                         | 7     |
-| 8   | Pizzicato Five - Twiggy Twiggy                | 6     |
-| 9   | Falco - Der Kommissar                         | 6     |
-| 10  | Stromae - Papaoutai                           | 6     |
+| 1   | [Adriano Celentano - Prisencolinensinainciusol](https://www.youtube.com/watch?v=fU-wH8SrFro) | ~39   |
+| 2   | [Nena - 99 Luftballons](https://www.youtube.com/watch?v=Fpu5a0Bl8eY)                         | 14    |
+| 3   | [The HU - Wolf Totem](https://www.youtube.com/watch?v=jM8dCGIm6yc)                           | 9     |
+| 4   | [O-Zone - Dragostea Din Tei](https://www.youtube.com/watch?v=YnopHCL1Jk8)                    | 9     |
+| 5   | [Plastic Bertrand - Ça Plane Pour Moi](https://www.youtube.com/watch?v=Ln31raI2ezY)          | ~17   |
+| 6   | [Rammstein - Sonne](https://www.youtube.com/watch?v=StZcUAPRRac) / [Du Hast](https://www.youtube.com/watch?v=W3q8Od5qJio) | ~11   |
+| 7   | [The HU - Yuve Yuve Yu](https://www.youtube.com/watch?v=v4xZUr0BEfE)                         | 7     |
+| 8   | [Pizzicato Five - Twiggy Twiggy](https://www.youtube.com/watch?v=NcdrTlNlSds)                | 6     |
+| 9   | [Falco - Der Kommissar](https://www.youtube.com/watch?v=8-bgiiTxhzM)                         | 6     |
+| 10  | [Stromae - Papaoutai](https://www.youtube.com/watch?v=oiKj0Z_Xnjc)                           | 6     |
 
 ## Usage
 
