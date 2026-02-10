@@ -140,6 +140,22 @@
         z-index: 100;
       }
 
+      #random-btn {
+        margin-top: 12px;
+        padding: 8px 16px;
+        background: #5a5a8a;
+        border: none;
+        border-radius: 6px;
+        color: #fff;
+        font-size: 14px;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      #random-btn:hover {
+        background: #7a7aaa;
+      }
+
       #legend {
         position: absolute;
         top: 20px;
@@ -295,6 +311,7 @@
       <div>Total posts: <strong id="total-posts">0</strong></div>
       <div>Tree depth: <strong id="tree-depth">0</strong></div>
       <div>Zoom: <strong id="zoom-level">100%</strong></div>
+      <button id="random-btn">🎲 Random Song</button>
     </div>
 
     <div id="legend">
@@ -335,6 +352,24 @@
 
     <script>
       let selectedNode = null;
+      let allTreeData = null;
+      let allNodes = null;
+      let nodesWithMedia = [];
+
+      function playRandom() {
+        if (nodesWithMedia.length === 0) return;
+        const randomIndex = Math.floor(Math.random() * nodesWithMedia.length);
+        const randomNode = nodesWithMedia[randomIndex];
+        showPlayer(randomNode);
+        
+        // Update selection
+        if (selectedNode) {
+          selectedNode.classed('selected', false);
+        }
+        const nodeEl = allNodes.filter(d => d.data.uri === randomNode.data.uri);
+        nodeEl.classed('selected', true);
+        selectedNode = nodeEl;
+      }
 
       function getEmbedUrl(mediaUrl) {
         if (!mediaUrl) return null;
@@ -591,6 +626,11 @@
             .join("g")
             .attr("class", "node")
             .attr("transform", (d) => `translate(${radialPoint(d.x, d.y)})`);
+
+          // Store references for random button
+          allTreeData = treeData;
+          allNodes = nodes;
+          nodesWithMedia = treeData.descendants().filter(d => d.data.media_url);
 
           nodes
             .append("circle")
