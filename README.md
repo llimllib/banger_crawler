@@ -29,16 +29,16 @@ Node size = number of quote-posts
 
 | #   | Song                                          | Posts |
 | --- | --------------------------------------------- | ----- |
-| 1   | [Adriano Celentano - Prisencolinensinainciusol](https://www.youtube.com/watch?v=fU-wH8SrFro) | 24    |
-| 2   | [Nena - 99 Luftballons](https://www.youtube.com/watch?v=Fpu5a0Bl8eY)                         | 14    |
-| 3   | [The HU - Wolf Totem](https://www.youtube.com/watch?v=jM8dCGIm6yc)                           | 9     |
-| 4   | [O-Zone - Dragostea Din Tei](https://www.youtube.com/watch?v=YnopHCL1Jk8)                    | 9     |
-| 5   | [Plastic Bertrand - Ça Plane Pour Moi](https://www.youtube.com/watch?v=Ln31raI2ezY)          | 9     |
-| 6   | [The HU - Yuve Yuve Yu](https://www.youtube.com/watch?v=v4xZUr0BEfE)                         | 7     |
-| 7   | [Pizzicato Five - Twiggy Twiggy](https://www.youtube.com/watch?v=NcdrTlNlSds)                | 6     |
-| 8   | [Falco - Der Kommissar](https://www.youtube.com/watch?v=8-bgiiTxhzM)                         | 6     |
-| 9   | [Rammstein - Sonne](https://www.youtube.com/watch?v=StZcUAPRRac)                             | 6     |
-| 10  | [Stromae - Papaoutai](https://www.youtube.com/watch?v=oiKj0Z_Xnjc)                           | 6     |
+| 1   | [Adriano Celentano - Prisencolinensinainciusol](https://www.youtube.com/watch?v=fU-wH8SrFro) | 48    |
+| 2   | [Plastic Bertrand - Ça Plane Pour Moi](https://www.youtube.com/watch?v=Ln31raI2ezY)          | 24    |
+| 3   | [Nena - 99 Luftballons](https://www.youtube.com/watch?v=Fpu5a0Bl8eY)                         | 17    |
+| 4   | [La Bamba](https://www.youtube.com/watch?v=BycLmWI97Nc)                                      | 12    |
+| 5   | [O-Zone - Dragostea Din Tei](https://www.youtube.com/watch?v=YnopHCL1Jk8)                    | 11    |
+| 6   | [The HU - Wolf Totem](https://www.youtube.com/watch?v=jM8dCGIm6yc)                           | 9     |
+| 7   | [Rammstein - Du Hast](https://www.youtube.com/watch?v=W3q8Od5qJio)                           | 8     |
+| 8   | [Falco - Der Kommissar](https://www.youtube.com/watch?v=8-bgiiTxhzM)                         | 8     |
+| 9   | [The HU - Yuve Yuve Yu](https://www.youtube.com/watch?v=v4xZUr0BEfE)                         | 7     |
+| 10  | [Stromae - Papaoutai](https://www.youtube.com/watch?v=oiKj0Z_Xnjc)                           | 7     |
 
 ## Usage
 
