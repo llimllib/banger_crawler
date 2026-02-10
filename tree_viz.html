@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banger Tree - "Post a banger that isn't in English"</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            overflow: hidden;
+        }
+        
+        #container {
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        .node circle {
+            stroke: #fff;
+            stroke-width: 1.5px;
+            cursor: pointer;
+        }
+        
+        .node.selected circle {
+            stroke: #ffeb3b;
+            stroke-width: 3px;
+        }
+        
+        .node text {
+            font-size: 10px;
+            fill: #ccc;
+            pointer-events: none;
+        }
+        
+        .link {
+            fill: none;
+            stroke: #4a4a6a;
+            stroke-width: 1px;
+            stroke-opacity: 0.6;
+        }
+        
+        #tooltip {
+            position: absolute;
+            background: rgba(20, 20, 40, 0.95);
+            border: 1px solid #5a5a8a;
+            border-radius: 8px;
+            padding: 12px;
+            max-width: 350px;
+            font-size: 13px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 1000;
+        }
+        
+        #tooltip.visible {
+            opacity: 1;
+        }
+        
+        #tooltip .author {
+            font-weight: bold;
+            color: #7eb8ff;
+            margin-bottom: 6px;
+        }
+        
+        #tooltip .text {
+            color: #ccc;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        #tooltip .song {
+            color: #7eff8a;
+            font-style: italic;
+        }
+        
+        #tooltip .stats {
+            color: #888;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+        
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(20, 20, 40, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #5a5a8a;
+            z-index: 100;
+        }
+        
+        #controls h1 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #7eb8ff;
+        }
+        
+        #controls p {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        
+        #stats {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(20, 20, 40, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #5a5a8a;
+            font-size: 12px;
+            z-index: 100;
+        }
+        
+        #legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(20, 20, 40, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #5a5a8a;
+            font-size: 12px;
+            z-index: 100;
+        }
+        
+        #legend h3 {
+            margin-bottom: 10px;
+            color: #7eb8ff;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        #player-panel {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 400px;
+            background: rgba(20, 20, 40, 0.95);
+            border: 1px solid #5a5a8a;
+            border-radius: 8px;
+            z-index: 100;
+            display: none;
+        }
+        
+        #player-panel.visible {
+            display: block;
+        }
+        
+        #player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #5a5a8a;
+        }
+        
+        #player-header .author {
+            font-weight: bold;
+            color: #7eb8ff;
+        }
+        
+        #player-header .close-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+        
+        #player-header .close-btn:hover {
+            color: #fff;
+        }
+        
+        #player-info {
+            padding: 12px 15px;
+            border-bottom: 1px solid #5a5a8a;
+        }
+        
+        #player-info .text {
+            color: #ccc;
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        
+        #player-info .song-title {
+            color: #7eff8a;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        #player-embed {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+        }
+        
+        #player-embed iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        #player-links {
+            padding: 10px 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        #player-links a {
+            color: #7eb8ff;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        
+        #player-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .no-embed {
+            padding: 30px;
+            text-align: center;
+            color: #888;
+        }
+        
+        .no-embed a {
+            color: #7eb8ff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    
+    <div id="controls">
+        <h1>🎵 "Post a banger that isn't in English"</h1>
+        <p>Scroll to zoom • Drag to pan • Hover for details</p>
+        <p>Click node to play the song!</p>
+    </div>
+    
+    <div id="stats">
+        <div>Total posts: <strong id="total-posts">0</strong></div>
+        <div>Tree depth: <strong id="tree-depth">0</strong></div>
+        <div>Zoom: <strong id="zoom-level">100%</strong></div>
+    </div>
+    
+    <div id="legend">
+        <h3>Node Size = Quotes</h3>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff6b6b;"></div>
+            <span>YouTube video</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #4ecdc4;"></div>
+            <span>Other media</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #95a5a6;"></div>
+            <span>No media</span>
+        </div>
+    </div>
+    
+    <div id="tooltip">
+        <div class="author"></div>
+        <div class="text"></div>
+        <div class="song"></div>
+        <div class="stats"></div>
+    </div>
+    
+    <div id="player-panel">
+        <div id="player-header">
+            <span class="author"></span>
+            <button class="close-btn" onclick="closePlayer()">&times;</button>
+        </div>
+        <div id="player-info">
+            <div class="text"></div>
+            <div class="song-title"></div>
+        </div>
+        <div id="player-embed"></div>
+        <div id="player-links"></div>
+    </div>
+
+    <script>
+        let selectedNode = null;
+        
+        function getEmbedUrl(mediaUrl) {
+            if (!mediaUrl) return null;
+            
+            // YouTube
+            const ytMatch = mediaUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
+            if (ytMatch) {
+                return {
+                    type: 'youtube',
+                    embedUrl: `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`,
+                    originalUrl: mediaUrl
+                };
+            }
+            
+            // Apple Music - embed format
+            // https://music.apple.com/us/album/xxx/123?i=456 -> https://embed.music.apple.com/us/album/xxx/123?i=456
+            if (mediaUrl.includes('music.apple.com')) {
+                const embedUrl = mediaUrl.replace('music.apple.com', 'embed.music.apple.com');
+                return {
+                    type: 'apple',
+                    embedUrl: embedUrl,
+                    originalUrl: mediaUrl
+                };
+            }
+            
+            // Spotify
+            // https://open.spotify.com/track/xxx -> https://open.spotify.com/embed/track/xxx
+            const spotifyMatch = mediaUrl.match(/open\.spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/);
+            if (spotifyMatch) {
+                return {
+                    type: 'spotify',
+                    embedUrl: `https://open.spotify.com/embed/${spotifyMatch[1]}/${spotifyMatch[2]}`,
+                    originalUrl: mediaUrl
+                };
+            }
+            
+            // Bandcamp - can't easily embed, return link
+            if (mediaUrl.includes('bandcamp.com')) {
+                return {
+                    type: 'bandcamp',
+                    embedUrl: null,
+                    originalUrl: mediaUrl
+                };
+            }
+            
+            // SoundCloud - would need oEmbed API, just link for now
+            if (mediaUrl.includes('soundcloud.com')) {
+                return {
+                    type: 'soundcloud',
+                    embedUrl: null,
+                    originalUrl: mediaUrl
+                };
+            }
+            
+            // Tidal
+            if (mediaUrl.includes('tidal.com')) {
+                return {
+                    type: 'tidal',
+                    embedUrl: null,
+                    originalUrl: mediaUrl
+                };
+            }
+            
+            return {
+                type: 'unknown',
+                embedUrl: null,
+                originalUrl: mediaUrl
+            };
+        }
+        
+        function showPlayer(d) {
+            const data = d.data;
+            const panel = document.getElementById('player-panel');
+            const embedContainer = document.getElementById('player-embed');
+            const linksContainer = document.getElementById('player-links');
+            
+            // Update header and info
+            panel.querySelector('#player-header .author').textContent = '@' + data.handle;
+            panel.querySelector('#player-info .text').textContent = data.text || '';
+            panel.querySelector('#player-info .song-title').textContent = data.media_title ? '🎵 ' + data.media_title : '';
+            
+            // Get embed info
+            const embed = getEmbedUrl(data.media_url);
+            
+            // Build links
+            let linksHtml = '';
+            if (data.uri) {
+                const match = data.uri.match(/at:\/\/([^/]+)\/app\.bsky\.feed\.post\/(.+)/);
+                if (match) {
+                    const handle = data.handle || match[1];
+                    const postId = match[2];
+                    linksHtml += `<a href="https://bsky.app/profile/${handle}/post/${postId}" target="_blank">View on Bluesky ↗</a>`;
+                }
+            }
+            if (embed && embed.originalUrl) {
+                linksHtml += `<a href="${embed.originalUrl}" target="_blank">Open in ${embed.type} ↗</a>`;
+            }
+            linksContainer.innerHTML = linksHtml;
+            
+            // Build embed or fallback
+            if (embed && embed.embedUrl) {
+                if (embed.type === 'apple') {
+                    embedContainer.innerHTML = `<iframe src="${embed.embedUrl}" allow="autoplay *; encrypted-media *;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation" style="height: 175px;"></iframe>`;
+                } else if (embed.type === 'spotify') {
+                    embedContainer.innerHTML = `<iframe src="${embed.embedUrl}" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style="height: 152px;"></iframe>`;
+                } else {
+                    embedContainer.innerHTML = `<iframe src="${embed.embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                }
+            } else if (embed && embed.originalUrl) {
+                embedContainer.innerHTML = `<div class="no-embed">
+                    <p>Can't embed ${embed.type} directly</p>
+                    <p><a href="${embed.originalUrl}" target="_blank">Open in new tab ↗</a></p>
+                </div>`;
+            } else if (!data.media_url) {
+                embedContainer.innerHTML = `<div class="no-embed"><p>No media attached to this post</p></div>`;
+            } else {
+                embedContainer.innerHTML = `<div class="no-embed">
+                    <p>Unknown media type</p>
+                    <p><a href="${data.media_url}" target="_blank">Open link ↗</a></p>
+                </div>`;
+            }
+            
+            panel.classList.add('visible');
+            
+            // Update selected state
+            if (selectedNode) {
+                selectedNode.classed('selected', false);
+            }
+            selectedNode = d3.select(d3.event ? d3.event.target : event.target).closest('.node');
+            selectedNode.classed('selected', true);
+        }
+        
+        function closePlayer() {
+            document.getElementById('player-panel').classList.remove('visible');
+            // Stop any playing media
+            document.getElementById('player-embed').innerHTML = '';
+            if (selectedNode) {
+                selectedNode.classed('selected', false);
+                selectedNode = null;
+            }
+        }
+        
+        // Load the tree data
+        d3.json('banger_tree.json').then(data => {
+            const root = data[0]; // Main tree root
+            
+            // Count nodes and depth
+            let totalNodes = 0;
+            let maxDepth = 0;
+            
+            function countNodes(node, depth = 0) {
+                totalNodes++;
+                maxDepth = Math.max(maxDepth, depth);
+                if (node.children) {
+                    node.children.forEach(c => countNodes(c, depth + 1));
+                }
+            }
+            countNodes(root);
+            
+            document.getElementById('total-posts').textContent = totalNodes;
+            document.getElementById('tree-depth').textContent = maxDepth;
+            
+            // Set up dimensions
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            // Create SVG
+            const svg = d3.select('#container')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+            
+            // Create a group for zoom/pan
+            const g = svg.append('g');
+            
+            // Set up zoom behavior
+            const zoom = d3.zoom()
+                .scaleExtent([0.1, 10])
+                .on('zoom', (event) => {
+                    g.attr('transform', event.transform);
+                    document.getElementById('zoom-level').textContent = 
+                        Math.round(event.transform.k * 100) + '%';
+                });
+            
+            svg.call(zoom);
+            
+            // Create tree layout - radial layout works better for this shape
+            const treeLayout = d3.tree()
+                .size([2 * Math.PI, Math.max(width, height) * 0.6])
+                .separation((a, b) => (a.parent == b.parent ? 1.3 : 1.8) / Math.sqrt(a.depth || 1));
+            
+            // Convert data to hierarchy
+            const hierarchy = d3.hierarchy(root);
+            const treeData = treeLayout(hierarchy);
+            
+            // Radial projection
+            function radialPoint(x, y) {
+                return [(y) * Math.cos(x - Math.PI / 2), (y) * Math.sin(x - Math.PI / 2)];
+            }
+            
+            // Draw links
+            g.selectAll('.link')
+                .data(treeData.links())
+                .join('path')
+                .attr('class', 'link')
+                .attr('d', d3.linkRadial()
+                    .angle(d => d.x)
+                    .radius(d => d.y));
+            
+            // Color scale based on media type
+            function getNodeColor(d) {
+                if (d.data.youtube_id) return '#ff6b6b';
+                if (d.data.media_url) return '#4ecdc4';
+                return '#95a5a6';
+            }
+            
+            // Size scale based on quotes
+            function getNodeSize(d) {
+                const quotes = d.data.quotes || 0;
+                return Math.max(3, Math.min(20, 3 + Math.sqrt(quotes) * 2));
+            }
+            
+            // Draw nodes
+            const nodes = g.selectAll('.node')
+                .data(treeData.descendants())
+                .join('g')
+                .attr('class', 'node')
+                .attr('transform', d => `translate(${radialPoint(d.x, d.y)})`);
+            
+            nodes.append('circle')
+                .attr('r', getNodeSize)
+                .attr('fill', getNodeColor)
+                .on('mouseover', showTooltip)
+                .on('mouseout', hideTooltip)
+                .on('click', (event, d) => {
+                    event.stopPropagation();
+                    showPlayer(d);
+                });
+            
+            // Tooltip
+            const tooltip = d3.select('#tooltip');
+            
+            function showTooltip(event, d) {
+                const data = d.data;
+                
+                tooltip.select('.author').text('@' + data.handle);
+                tooltip.select('.text').text(data.text || '(no text)');
+                tooltip.select('.song').text(data.media_title ? '🎵 ' + data.media_title : '');
+                tooltip.select('.stats').text(`❤️ ${data.likes || 0} likes • 🔁 ${data.quotes || 0} quotes`);
+                
+                tooltip
+                    .style('left', (event.pageX + 15) + 'px')
+                    .style('top', (event.pageY - 10) + 'px')
+                    .classed('visible', true);
+            }
+            
+            function hideTooltip() {
+                tooltip.classed('visible', false);
+            }
+            
+            // Click on background to close player
+            svg.on('click', () => {
+                closePlayer();
+            });
+            
+            // Initial zoom to fit
+            const initialScale = 0.5;
+            const initialX = width / 2;
+            const initialY = height / 2;
+            
+            svg.call(zoom.transform, d3.zoomIdentity
+                .translate(initialX, initialY)
+                .scale(initialScale));
+                
+        }).catch(err => {
+            console.error('Error loading data:', err);
+            document.body.innerHTML = '<div style="padding: 50px; color: red;">Error loading banger_tree.json. Make sure to run this from a local server.</div>';
+        });
+    </script>
+</body>
+</html>
