@@ -10,6 +10,8 @@ The meme spread through quote-posts, creating a massive tree structure that's no
 
 ## Live Visualization
 
+![screenshot of the visualization](docs/shot.png)
+
 👉 **[View the interactive tree](https://llimllib.github.io/banger_crawler/)**
 
 - **Scroll** to zoom in/out
@@ -27,8 +29,8 @@ Node size = number of quote-posts
 
 ## Top Songs
 
-| #   | Song                                          | Posts |
-| --- | --------------------------------------------- | ----- |
+| #   | Song                                                                                         | Posts |
+| --- | -------------------------------------------------------------------------------------------- | ----- |
 | 1   | [Adriano Celentano - Prisencolinensinainciusol](https://www.youtube.com/watch?v=fU-wH8SrFro) | 48    |
 | 2   | [Plastic Bertrand - Ça Plane Pour Moi](https://www.youtube.com/watch?v=Ln31raI2ezY)          | 24    |
 | 3   | [Nena - 99 Luftballons](https://www.youtube.com/watch?v=Fpu5a0Bl8eY)                         | 17    |
